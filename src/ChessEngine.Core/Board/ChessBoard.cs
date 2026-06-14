@@ -28,9 +28,9 @@ public class ChessBoard
     }
 
     /// <summary>
-    /// Creates a board with the standard chess starting positions.
+    /// Creates a board with the standard chess starting piece placement.
     /// </summary>
-    public static ChessBoard CreateStartingPosition()
+    public static ChessBoard CreateStartingBoard()
     {
         ChessBoard board = CreateEmpty();
 
