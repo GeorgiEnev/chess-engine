@@ -52,17 +52,17 @@ public sealed class ChessBoardTests
     [InlineData(5, PieceType.Bishop)]
     [InlineData(6, PieceType.Knight)]
     [InlineData(7, PieceType.Rook)]
-    public void CreateStartingPosition_PlacesWhiteBackRank(int file, PieceType expectedType)
+    public void CreateStartingBoard_PlacesWhiteBackRank(int file, PieceType expectedType)
     {
-        ChessBoard board = ChessBoard.CreateStartingPosition();
+        ChessBoard board = ChessBoard.CreateStartingBoard();
 
         Assert.Equal(new Piece(Color.White, expectedType), board.GetPiece(Square.FromFileRank(file, 0)));
     }
 
     [Fact]
-    public void CreateStartingPosition_PlacesWhitePawns()
+    public void CreateStartingBoard_PlacesWhitePawns()
     {
-        ChessBoard board = ChessBoard.CreateStartingPosition();
+        ChessBoard board = ChessBoard.CreateStartingBoard();
 
         for (int file = 0; file < 8; file++)
         {
@@ -79,17 +79,17 @@ public sealed class ChessBoardTests
     [InlineData(5, PieceType.Bishop)]
     [InlineData(6, PieceType.Knight)]
     [InlineData(7, PieceType.Rook)]
-    public void CreateStartingPosition_PlacesBlackBackRank(int file, PieceType expectedType)
+    public void CreateStartingBoard_PlacesBlackBackRank(int file, PieceType expectedType)
     {
-        ChessBoard board = ChessBoard.CreateStartingPosition();
+        ChessBoard board = ChessBoard.CreateStartingBoard();
 
         Assert.Equal(new Piece(Color.Black, expectedType), board.GetPiece(Square.FromFileRank(file, 7)));
     }
 
     [Fact]
-    public void CreateStartingPosition_PlacesBlackPawns()
+    public void CreateStartingBoard_PlacesBlackPawns()
     {
-        ChessBoard board = ChessBoard.CreateStartingPosition();
+        ChessBoard board = ChessBoard.CreateStartingBoard();
 
         for (int file = 0; file < 8; file++)
         {
@@ -98,9 +98,9 @@ public sealed class ChessBoardTests
     }
 
     [Fact]
-    public void CreateStartingPosition_LeavesMiddleSquaresEmpty()
+    public void CreateStartingBoard_LeavesMiddleSquaresEmpty()
     {
-        ChessBoard board = ChessBoard.CreateStartingPosition();
+        ChessBoard board = ChessBoard.CreateStartingBoard();
 
         for (int rank = 2; rank <= 5; rank++)
         {
