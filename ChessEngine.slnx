@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/ChessEngine.Core/ChessEngine.Core.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/ChessEngine.Core.Tests/ChessEngine.Core.Tests.csproj" />
+  </Folder>
+</Solution>
