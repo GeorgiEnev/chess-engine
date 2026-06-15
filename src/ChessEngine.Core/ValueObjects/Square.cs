@@ -21,7 +21,7 @@ public readonly record struct Square
     public int Rank => Index / 8;
 
     /// <summary>
-    /// Creates a square from a zero-based square index.
+    /// Initializes a square from a zero-based square index.
     /// </summary>
     /// <param name="index">The square index from 0 to 63.</param>
     /// <exception cref="ArgumentOutOfRangeException">
@@ -62,9 +62,45 @@ public readonly record struct Square
     }
 
     /// <summary>
-    /// Converts the square to algebraic coordinate notation, such as a1, e4, or h8.
+    /// Creates a square from a standard square name, such as a1, e4, or h8.
     /// </summary>
-    /// <returns>The square name in algebraic coordinate notation.</returns>
+    /// <param name="name">The square name to parse.</param>
+    /// <returns>The square represented by the given name.</returns>
+    /// <exception cref="ArgumentException">
+    /// Thrown when <paramref name="name"/> is not a valid square name.
+    /// </exception>
+    public static Square FromName(string name)
+    {
+        ArgumentNullException.ThrowIfNull(name);
+
+        if (name.Length != 2)
+        {
+            throw new ArgumentException("Square name must contain exactly 2 characters.", nameof(name));
+        }
+
+        char fileName = name[0];
+        char rankName = name[1];
+
+        if (fileName is < 'a' or > 'h')
+        {
+            throw new ArgumentException("Square file must be between a and h.", nameof(name));
+        }
+
+        if (rankName is < '1' or > '8')
+        {
+            throw new ArgumentException("Square rank must be between 1 and 8.", nameof(name));
+        }
+
+        int file = fileName - 'a';
+        int rank = rankName - '1';
+
+        return FromFileRank(file, rank);
+    }
+
+    /// <summary>
+    /// Converts the square to its standard square name, such as a1, e4, or h8.
+    /// </summary>
+    /// <returns>The square name.</returns>
     public override string ToString()
     {
         char fileName = (char)('a' + File);
