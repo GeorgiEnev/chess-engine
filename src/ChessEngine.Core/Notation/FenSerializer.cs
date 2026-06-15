@@ -6,7 +6,7 @@ using ChessEngine.Core.ValueObjects;
 namespace ChessEngine.Core.Notation;
 
 /// <summary>
-/// Converts chess position state into standard FEN notation.
+/// Provides serialization logic for standard FEN notation.
 /// </summary>
 public static class FenSerializer
 {

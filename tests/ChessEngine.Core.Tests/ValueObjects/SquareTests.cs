@@ -48,4 +48,34 @@ public sealed class SquareTests
     {
         Assert.Throws<ArgumentOutOfRangeException>(() => Square.FromFileRank(file, rank));
     }
+
+    [Theory]
+    [InlineData("a1", 0)]
+    [InlineData("e4", 28)]
+    [InlineData("h8", 63)]
+    public void FromName_CreatesExpectedSquare(string name, int expectedIndex)
+    {
+        Square square = Square.FromName(name);
+
+        Assert.Equal(expectedIndex, square.Index);
+        Assert.Equal(name, square.ToString());
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("e")]
+    [InlineData("e44")]
+    [InlineData("i4")]
+    [InlineData("e9")]
+    [InlineData("E4")]
+    public void FromName_WithInvalidName_Throws(string name)
+    {
+        Assert.Throws<ArgumentException>(() => Square.FromName(name));
+    }
+
+    [Fact]
+    public void FromName_WithNullName_Throws()
+    {
+        Assert.Throws<ArgumentNullException>(() => Square.FromName(null!));
+    }
 }
