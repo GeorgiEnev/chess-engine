@@ -62,7 +62,7 @@ public sealed class MoveGeneratorTests
         ChessBoard board = ChessBoard.CreateEmpty();
         board.SetPiece(Square.FromName("d4"), new Piece(Color.White, PieceType.Knight));
         board.SetPiece(Square.FromName("e6"), new Piece(Color.White, PieceType.Pawn));
-        board.SetPiece(Square.FromName("f5"), new Piece(Color.White, PieceType.Bishop));
+        board.SetPiece(Square.FromName("f5"), new Piece(Color.White, PieceType.Pawn));
         Position position = CreatePosition(board, Color.White);
 
         IReadOnlyList<Move> moves = MoveGenerator.GenerateMoves(position);
@@ -103,6 +103,86 @@ public sealed class MoveGeneratorTests
         Assert.Contains(new Move(Square.FromName("g8"), Square.FromName("e7")), moves);
         Assert.Contains(new Move(Square.FromName("g8"), Square.FromName("f6")), moves);
         Assert.Contains(new Move(Square.FromName("g8"), Square.FromName("h6")), moves);
+    }
+
+    [Fact]
+    public void GenerateMoves_ForBishopInCenter_GeneratesDiagonalMoves()
+    {
+        ChessBoard board = ChessBoard.CreateEmpty();
+        board.SetPiece(Square.FromName("d4"), new Piece(Color.White, PieceType.Bishop));
+        Position position = CreatePosition(board, Color.White);
+
+        IReadOnlyList<Move> moves = MoveGenerator.GenerateMoves(position);
+
+        Assert.Equal(13, moves.Count);
+        Assert.Contains(new Move(Square.FromName("d4"), Square.FromName("e5")), moves);
+        Assert.Contains(new Move(Square.FromName("d4"), Square.FromName("h8")), moves);
+        Assert.Contains(new Move(Square.FromName("d4"), Square.FromName("a1")), moves);
+        Assert.Contains(new Move(Square.FromName("d4"), Square.FromName("a7")), moves);
+    }
+
+    [Fact]
+    public void GenerateMoves_ForRookInCenter_GeneratesStraightMoves()
+    {
+        ChessBoard board = ChessBoard.CreateEmpty();
+        board.SetPiece(Square.FromName("d4"), new Piece(Color.White, PieceType.Rook));
+        Position position = CreatePosition(board, Color.White);
+
+        IReadOnlyList<Move> moves = MoveGenerator.GenerateMoves(position);
+
+        Assert.Equal(14, moves.Count);
+        Assert.Contains(new Move(Square.FromName("d4"), Square.FromName("d8")), moves);
+        Assert.Contains(new Move(Square.FromName("d4"), Square.FromName("h4")), moves);
+        Assert.Contains(new Move(Square.FromName("d4"), Square.FromName("d1")), moves);
+        Assert.Contains(new Move(Square.FromName("d4"), Square.FromName("a4")), moves);
+    }
+
+    [Fact]
+    public void GenerateMoves_ForQueenInCenter_GeneratesDiagonalAndStraightMoves()
+    {
+        ChessBoard board = ChessBoard.CreateEmpty();
+        board.SetPiece(Square.FromName("d4"), new Piece(Color.White, PieceType.Queen));
+        Position position = CreatePosition(board, Color.White);
+
+        IReadOnlyList<Move> moves = MoveGenerator.GenerateMoves(position);
+
+        Assert.Equal(27, moves.Count);
+        Assert.Contains(new Move(Square.FromName("d4"), Square.FromName("h8")), moves);
+        Assert.Contains(new Move(Square.FromName("d4"), Square.FromName("d8")), moves);
+        Assert.Contains(new Move(Square.FromName("d4"), Square.FromName("a1")), moves);
+        Assert.Contains(new Move(Square.FromName("d4"), Square.FromName("a4")), moves);
+    }
+
+    [Fact]
+    public void GenerateMoves_ForSlidingPieceWithFriendlyBlocker_StopsBeforeFriendlyPiece()
+    {
+        ChessBoard board = ChessBoard.CreateEmpty();
+        board.SetPiece(Square.FromName("d4"), new Piece(Color.White, PieceType.Rook));
+        board.SetPiece(Square.FromName("d6"), new Piece(Color.White, PieceType.Pawn));
+        Position position = CreatePosition(board, Color.White);
+
+        IReadOnlyList<Move> moves = MoveGenerator.GenerateMoves(position);
+
+        Assert.Contains(new Move(Square.FromName("d4"), Square.FromName("d5")), moves);
+        Assert.DoesNotContain(new Move(Square.FromName("d4"), Square.FromName("d6")), moves);
+        Assert.DoesNotContain(new Move(Square.FromName("d4"), Square.FromName("d7")), moves);
+        Assert.DoesNotContain(new Move(Square.FromName("d4"), Square.FromName("d8")), moves);
+    }
+
+    [Fact]
+    public void GenerateMoves_ForSlidingPieceWithEnemyBlocker_CapturesAndStops()
+    {
+        ChessBoard board = ChessBoard.CreateEmpty();
+        board.SetPiece(Square.FromName("d4"), new Piece(Color.White, PieceType.Rook));
+        board.SetPiece(Square.FromName("d6"), new Piece(Color.Black, PieceType.Pawn));
+        Position position = CreatePosition(board, Color.White);
+
+        IReadOnlyList<Move> moves = MoveGenerator.GenerateMoves(position);
+
+        Assert.Contains(new Move(Square.FromName("d4"), Square.FromName("d5")), moves);
+        Assert.Contains(new Move(Square.FromName("d4"), Square.FromName("d6")), moves);
+        Assert.DoesNotContain(new Move(Square.FromName("d4"), Square.FromName("d7")), moves);
+        Assert.DoesNotContain(new Move(Square.FromName("d4"), Square.FromName("d8")), moves);
     }
 
     private static Position CreatePosition(ChessBoard board, Color sideToMove)

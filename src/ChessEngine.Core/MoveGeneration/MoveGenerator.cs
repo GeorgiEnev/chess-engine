@@ -9,16 +9,32 @@ namespace ChessEngine.Core.MoveGeneration;
 /// </summary>
 public static class MoveGenerator
 {
-    private static readonly (int FileOffset, int RankOffset)[] KnightOffsets =
+    private static readonly Direction[] KnightDirections =
     [
-        (1, 2),
-        (2, 1),
-        (2, -1),
-        (1, -2),
-        (-1, -2),
-        (-2, -1),
-        (-2, 1),
-        (-1, 2)
+        new(1, 2),
+        new(2, 1),
+        new(2, -1),
+        new(1, -2),
+        new(-1, -2),
+        new(-2, -1),
+        new(-2, 1),
+        new(-1, 2)
+    ];
+
+    private static readonly Direction[] BishopDirections =
+    [
+        new(1, 1),
+        new(1, -1),
+        new(-1, -1),
+        new(-1, 1)
+    ];
+
+    private static readonly Direction[] RookDirections =
+    [
+        new(0, 1),
+        new(1, 0),
+        new(0, -1),
+        new(-1, 0)
     ];
 
     /// <summary>
@@ -42,22 +58,38 @@ public static class MoveGenerator
                 continue;
             }
 
-            if (piece.Value.Type == PieceType.Knight)
+            switch (piece.Value.Type)
             {
-                AddKnightMoves(position, from, piece.Value.Color, moves);
+                case PieceType.Knight:
+                    GenerateKnightMoves(position, from, piece.Value.Color, moves);
+                    break;
+
+                case PieceType.Bishop:
+                    GenerateSlidingMoves(position, from, piece.Value.Color, BishopDirections, moves);
+                    break;
+
+                case PieceType.Rook:
+                    GenerateSlidingMoves(position, from, piece.Value.Color, RookDirections, moves);
+                    break;
+
+                //Queen can move both like a bishop and rook
+                case PieceType.Queen:
+                    GenerateSlidingMoves(position, from, piece.Value.Color, BishopDirections, moves);
+                    GenerateSlidingMoves(position, from, piece.Value.Color, RookDirections, moves);
+                    break;
             }
         }
 
         return moves;
     }
 
-    // Knights move by fixed file/rank offsets and can jump over nearby pieces.
-    private static void AddKnightMoves(Position position, Square from, Color movingColor, List<Move> moves)
+    // Generates pseudo-legal knight moves by checking each fixed L-shaped target square.
+    private static void GenerateKnightMoves(Position position, Square from, Color movingColor, List<Move> moves)
     {
-        foreach ((int fileOffset, int rankOffset) in KnightOffsets)
+        foreach (Direction direction in KnightDirections)
         {
-            int targetFile = from.File + fileOffset;
-            int targetRank = from.Rank + rankOffset;
+            int targetFile = from.File + direction.FileOffset;
+            int targetRank = from.Rank + direction.RankOffset;
 
             if (!IsInsideBoard(targetFile, targetRank))
             {
@@ -66,7 +98,7 @@ public static class MoveGenerator
 
             Square to = Square.FromFileRank(targetFile, targetRank);
 
-            if (IsFriendlyPiece(position, to, movingColor))
+            if (IsOccupiedByFriendlyPiece(position, to, movingColor))
             {
                 continue;
             }
@@ -75,15 +107,58 @@ public static class MoveGenerator
         }
     }
 
+    // Generates pseudo-legal sliding moves for sliding pieces(bishop, rook, queen) 
+    // by walking each direction until the board edge or a blocker is reached.
+    private static void GenerateSlidingMoves(
+        Position position,
+        Square from,
+        Color movingColor,
+        IReadOnlyList<Direction> directions,
+        List<Move> moves)
+    {
+        foreach (Direction direction in directions)
+        {
+            int targetFile = from.File + direction.FileOffset;
+            int targetRank = from.Rank + direction.RankOffset;
+
+            while (IsInsideBoard(targetFile, targetRank))
+            {
+                Square to = Square.FromFileRank(targetFile, targetRank);
+
+                if (IsOccupiedByFriendlyPiece(position, to, movingColor))
+                {
+                    break;
+                }
+
+                moves.Add(new Move(from, to));
+
+                if (IsOccupiedByEnemyPiece(position, to, movingColor))
+                {
+                    break;
+                }
+
+                targetFile += direction.FileOffset;
+                targetRank += direction.RankOffset;
+            }
+        }
+    }
+
     private static bool IsInsideBoard(int file, int rank)
     {
         return file is >= 0 and <= 7 && rank is >= 0 and <= 7;
     }
 
-    private static bool IsFriendlyPiece(Position position, Square square, Color movingColor)
+    private static bool IsOccupiedByFriendlyPiece(Position position, Square square, Color movingColor)
     {
         Piece? targetPiece = position.Board.GetPiece(square);
 
         return targetPiece is not null && targetPiece.Value.Color == movingColor;
+    }
+
+    private static bool IsOccupiedByEnemyPiece(Position position, Square square, Color movingColor)
+    {
+        Piece? targetPiece = position.Board.GetPiece(square);
+
+        return targetPiece is not null && targetPiece.Value.Color != movingColor;
     }
 }
