@@ -60,6 +60,10 @@ public static class MoveGenerator
 
             switch (piece.Value.Type)
             {
+                case PieceType.Pawn:
+                    GeneratePawnMoves(position, from, piece.Value.Color, moves);
+                    break;
+
                 case PieceType.Knight:
                     GenerateKnightMoves(position, from, piece.Value.Color, moves);
                     break;
@@ -72,7 +76,7 @@ public static class MoveGenerator
                     GenerateSlidingMoves(position, from, piece.Value.Color, RookDirections, moves);
                     break;
 
-                //Queen can move both like a bishop and rook
+                // A queen combines bishop-style diagonal movement and rook-style straight movement.
                 case PieceType.Queen:
                     GenerateSlidingMoves(position, from, piece.Value.Color, BishopDirections, moves);
                     GenerateSlidingMoves(position, from, piece.Value.Color, RookDirections, moves);
@@ -81,6 +85,48 @@ public static class MoveGenerator
         }
 
         return moves;
+    }
+
+    // Generates pseudo-legal pawn moves by delegating each pawn rule to focused helpers.
+    private static void GeneratePawnMoves(Position position, Square from, Color movingColor, List<Move> moves)
+    {
+        GeneratePawnForwardMoves(position, from, movingColor, moves);
+    }
+
+    // Generates pseudo-legal forward pawn moves, including the two-square move from the starting rank.
+    private static void GeneratePawnForwardMoves(Position position, Square from, Color movingColor, List<Move> moves)
+    {
+        int forwardDirection = movingColor == Color.White ? 1 : -1;
+        int startingRank = movingColor == Color.White ? 1 : 6;
+
+        int oneStepRank = from.Rank + forwardDirection;
+
+        if (!IsInsideBoard(from.File, oneStepRank))
+        {
+            return;
+        }
+
+        Square oneStep = Square.FromFileRank(from.File, oneStepRank);
+
+        if (!position.Board.IsEmpty(oneStep))
+        {
+            return;
+        }
+
+        moves.Add(new Move(from, oneStep));
+
+        if (from.Rank != startingRank)
+        {
+            return;
+        }
+
+        int twoStepRank = from.Rank + forwardDirection * 2;
+        Square twoStep = Square.FromFileRank(from.File, twoStepRank);
+
+        if (position.Board.IsEmpty(twoStep))
+        {
+            moves.Add(new Move(from, twoStep));
+        }
     }
 
     // Generates pseudo-legal knight moves by checking each fixed L-shaped target square.
