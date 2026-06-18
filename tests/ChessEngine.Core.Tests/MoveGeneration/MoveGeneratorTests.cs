@@ -455,6 +455,67 @@ public sealed class MoveGeneratorTests
         Assert.DoesNotContain(new Move(Square.FromName("e5"), Square.FromName("g6")), moves);
     }
 
+    [Fact]
+    public void GenerateMoves_ForKingInCenter_GeneratesAdjacentMoves()
+    {
+        ChessBoard board = ChessBoard.CreateEmpty();
+        board.SetPiece(Square.FromName("e4"), new Piece(Color.White, PieceType.King));
+        Position position = CreatePosition(board, Color.White);
+
+        IReadOnlyList<Move> moves = MoveGenerator.GenerateMoves(position);
+
+        Assert.Equal(8, moves.Count);
+        Assert.Contains(new Move(Square.FromName("e4"), Square.FromName("e5")), moves);
+        Assert.Contains(new Move(Square.FromName("e4"), Square.FromName("f5")), moves);
+        Assert.Contains(new Move(Square.FromName("e4"), Square.FromName("f4")), moves);
+        Assert.Contains(new Move(Square.FromName("e4"), Square.FromName("f3")), moves);
+        Assert.Contains(new Move(Square.FromName("e4"), Square.FromName("e3")), moves);
+        Assert.Contains(new Move(Square.FromName("e4"), Square.FromName("d3")), moves);
+        Assert.Contains(new Move(Square.FromName("e4"), Square.FromName("d4")), moves);
+        Assert.Contains(new Move(Square.FromName("e4"), Square.FromName("d5")), moves);
+    }
+
+    [Fact]
+    public void GenerateMoves_ForKingInCorner_GeneratesOnlyMovesInsideBoard()
+    {
+        ChessBoard board = ChessBoard.CreateEmpty();
+        board.SetPiece(Square.FromName("a1"), new Piece(Color.White, PieceType.King));
+        Position position = CreatePosition(board, Color.White);
+
+        IReadOnlyList<Move> moves = MoveGenerator.GenerateMoves(position);
+
+        Assert.Equal(3, moves.Count);
+        Assert.Contains(new Move(Square.FromName("a1"), Square.FromName("a2")), moves);
+        Assert.Contains(new Move(Square.FromName("a1"), Square.FromName("b2")), moves);
+        Assert.Contains(new Move(Square.FromName("a1"), Square.FromName("b1")), moves);
+    }
+
+    [Fact]
+    public void GenerateMoves_ForKingWithFriendlyTarget_SkipsFriendlyOccupiedSquare()
+    {
+        ChessBoard board = ChessBoard.CreateEmpty();
+        board.SetPiece(Square.FromName("e4"), new Piece(Color.White, PieceType.King));
+        board.SetPiece(Square.FromName("e5"), new Piece(Color.White, PieceType.Pawn));
+        Position position = CreatePosition(board, Color.White);
+
+        IReadOnlyList<Move> moves = MoveGenerator.GenerateMoves(position);
+
+        Assert.DoesNotContain(new Move(Square.FromName("e4"), Square.FromName("e5")), moves);
+    }
+
+    [Fact]
+    public void GenerateMoves_ForKingWithEnemyTarget_IncludesCaptureMove()
+    {
+        ChessBoard board = ChessBoard.CreateEmpty();
+        board.SetPiece(Square.FromName("e4"), new Piece(Color.White, PieceType.King));
+        board.SetPiece(Square.FromName("e5"), new Piece(Color.Black, PieceType.Pawn));
+        Position position = CreatePosition(board, Color.White);
+
+        IReadOnlyList<Move> moves = MoveGenerator.GenerateMoves(position);
+
+        Assert.Contains(new Move(Square.FromName("e4"), Square.FromName("e5")), moves);
+    }
+
     private static Position CreatePosition(ChessBoard board, Color sideToMove)
     {
         return CreatePosition(board, sideToMove, enPassantTarget: null);

@@ -45,6 +45,18 @@ public static class MoveGenerator
         PieceType.Knight
     ];
 
+    private static readonly Direction[] KingDirections =
+    [
+        new(0, 1),
+        new(1, 1),
+        new(1, 0),
+        new(1, -1),
+        new(0, -1),
+        new(-1, -1),
+        new(-1, 0),
+        new(-1, 1)
+    ];
+
     /// <summary>
     /// Generates pseudo-legal moves for the side whose turn it is to move.
     /// </summary>
@@ -88,6 +100,10 @@ public static class MoveGenerator
                 case PieceType.Queen:
                     GenerateSlidingMoves(position, from, piece.Value.Color, BishopDirections, moves);
                     GenerateSlidingMoves(position, from, piece.Value.Color, RookDirections, moves);
+                    break;
+
+                case PieceType.King:
+                    GenerateKingMoves(position, from, piece.Value.Color, moves);
                     break;
             }
         }
@@ -264,6 +280,30 @@ public static class MoveGenerator
                 targetFile += direction.FileOffset;
                 targetRank += direction.RankOffset;
             }
+        }
+    }
+
+    // Generates pseudo-legal king moves by checking each adjacent target square.
+    private static void GenerateKingMoves(Position position, Square from, Color movingColor, List<Move> moves)
+    {
+        foreach (Direction direction in KingDirections)
+        {
+            int targetFile = from.File + direction.FileOffset;
+            int targetRank = from.Rank + direction.RankOffset;
+
+            if (!IsInsideBoard(targetFile, targetRank))
+            {
+                continue;
+            }
+
+            Square to = Square.FromFileRank(targetFile, targetRank);
+
+            if (IsOccupiedByFriendlyPiece(position, to, movingColor))
+            {
+                continue;
+            }
+
+            moves.Add(new Move(from, to));
         }
     }
 
