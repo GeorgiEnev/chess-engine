@@ -255,6 +255,85 @@ public sealed class MoveGeneratorTests
         Assert.Contains(new Move(Square.FromName("e3"), Square.FromName("e4")), moves);
     }
 
+    [Fact]
+    public void GenerateMoves_ForWhitePawnWithEnemyDiagonalTargets_GeneratesCaptureMoves()
+    {
+        ChessBoard board = ChessBoard.CreateEmpty();
+        board.SetPiece(Square.FromName("e4"), new Piece(Color.White, PieceType.Pawn));
+        board.SetPiece(Square.FromName("d5"), new Piece(Color.Black, PieceType.Knight));
+        board.SetPiece(Square.FromName("f5"), new Piece(Color.Black, PieceType.Bishop));
+        Position position = CreatePosition(board, Color.White);
+
+        IReadOnlyList<Move> moves = MoveGenerator.GenerateMoves(position);
+
+        Assert.Equal(3, moves.Count);
+        Assert.Contains(new Move(Square.FromName("e4"), Square.FromName("e5")), moves);
+        Assert.Contains(new Move(Square.FromName("e4"), Square.FromName("d5")), moves);
+        Assert.Contains(new Move(Square.FromName("e4"), Square.FromName("f5")), moves);
+    }
+
+    [Fact]
+    public void GenerateMoves_ForBlackPawnWithEnemyDiagonalTargets_GeneratesCaptureMoves()
+    {
+        ChessBoard board = ChessBoard.CreateEmpty();
+        board.SetPiece(Square.FromName("e5"), new Piece(Color.Black, PieceType.Pawn));
+        board.SetPiece(Square.FromName("d4"), new Piece(Color.White, PieceType.Knight));
+        board.SetPiece(Square.FromName("f4"), new Piece(Color.White, PieceType.Bishop));
+        Position position = CreatePosition(board, Color.Black);
+
+        IReadOnlyList<Move> moves = MoveGenerator.GenerateMoves(position);
+
+        Assert.Equal(3, moves.Count);
+        Assert.Contains(new Move(Square.FromName("e5"), Square.FromName("e4")), moves);
+        Assert.Contains(new Move(Square.FromName("e5"), Square.FromName("d4")), moves);
+        Assert.Contains(new Move(Square.FromName("e5"), Square.FromName("f4")), moves);
+    }
+
+    [Fact]
+    public void GenerateMoves_ForPawnWithFriendlyDiagonalTargets_DoesNotGenerateCaptureMoves()
+    {
+        ChessBoard board = ChessBoard.CreateEmpty();
+        board.SetPiece(Square.FromName("e4"), new Piece(Color.White, PieceType.Pawn));
+        board.SetPiece(Square.FromName("d5"), new Piece(Color.White, PieceType.Knight));
+        board.SetPiece(Square.FromName("f5"), new Piece(Color.White, PieceType.Bishop));
+        Position position = CreatePosition(board, Color.White);
+
+        IReadOnlyList<Move> moves = MoveGenerator.GenerateMoves(position);
+
+        Assert.DoesNotContain(new Move(Square.FromName("e4"), Square.FromName("d5")), moves);
+        Assert.DoesNotContain(new Move(Square.FromName("e4"), Square.FromName("f5")), moves);
+    }
+
+    [Fact]
+    public void GenerateMoves_ForPawnWithEmptyDiagonalTargets_DoesNotGenerateCaptureMoves()
+    {
+        ChessBoard board = ChessBoard.CreateEmpty();
+        board.SetPiece(Square.FromName("e4"), new Piece(Color.White, PieceType.Pawn));
+        Position position = CreatePosition(board, Color.White);
+
+        IReadOnlyList<Move> moves = MoveGenerator.GenerateMoves(position);
+
+        Assert.Single(moves);
+        Assert.Contains(new Move(Square.FromName("e4"), Square.FromName("e5")), moves);
+        Assert.DoesNotContain(new Move(Square.FromName("e4"), Square.FromName("d5")), moves);
+        Assert.DoesNotContain(new Move(Square.FromName("e4"), Square.FromName("f5")), moves);
+    }
+
+    [Fact]
+    public void GenerateMoves_ForPawnOnBoardEdge_GeneratesOnlyCapturesInsideBoard()
+    {
+        ChessBoard board = ChessBoard.CreateEmpty();
+        board.SetPiece(Square.FromName("a4"), new Piece(Color.White, PieceType.Pawn));
+        board.SetPiece(Square.FromName("b5"), new Piece(Color.Black, PieceType.Knight));
+        Position position = CreatePosition(board, Color.White);
+
+        IReadOnlyList<Move> moves = MoveGenerator.GenerateMoves(position);
+
+        Assert.Equal(2, moves.Count);
+        Assert.Contains(new Move(Square.FromName("a4"), Square.FromName("a5")), moves);
+        Assert.Contains(new Move(Square.FromName("a4"), Square.FromName("b5")), moves);
+    }
+
     private static Position CreatePosition(ChessBoard board, Color sideToMove)
     {
         return new Position(

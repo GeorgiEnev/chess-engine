@@ -91,6 +91,7 @@ public static class MoveGenerator
     private static void GeneratePawnMoves(Position position, Square from, Color movingColor, List<Move> moves)
     {
         GeneratePawnForwardMoves(position, from, movingColor, moves);
+        GeneratePawnCaptureMoves(position, from, movingColor, moves);
     }
 
     // Generates pseudo-legal forward pawn moves, including the two-square move from the starting rank.
@@ -126,6 +127,30 @@ public static class MoveGenerator
         if (position.Board.IsEmpty(twoStep))
         {
             moves.Add(new Move(from, twoStep));
+        }
+    }
+
+    // Generates pseudo-legal diagonal pawn captures when an enemy piece is on the target square.
+    private static void GeneratePawnCaptureMoves(Position position, Square from, Color movingColor, List<Move> moves)
+    {
+        int forwardDirection = movingColor == Color.White ? 1 : -1;
+        int targetRank = from.Rank + forwardDirection;
+
+        for (int fileOffset = -1; fileOffset <= 1; fileOffset += 2)
+        {
+            int targetFile = from.File + fileOffset;
+
+            if (!IsInsideBoard(targetFile, targetRank))
+            {
+                continue;
+            }
+
+            Square to = Square.FromFileRank(targetFile, targetRank);
+
+            if (IsOccupiedByEnemyPiece(position, to, movingColor))
+            {
+                moves.Add(new Move(from, to));
+            }
         }
     }
 
