@@ -1,4 +1,4 @@
-namespace ChessEngine.Core.MoveGeneration;
+namespace ChessEngine.Core.Geometry;
 
 /// <summary>
 /// Represents a file and rank offset used to move from one square toward another.

@@ -1,0 +1,68 @@
+using ChessEngine.Core.Enums;
+using ChessEngine.Core.Geometry;
+using ChessEngine.Core.Positions;
+using ChessEngine.Core.ValueObjects;
+
+namespace ChessEngine.Core.Attacks;
+
+/// <summary>
+/// Provides attack detection logic for chess positions.
+/// </summary>
+public static class AttackDetector
+{
+    private static readonly Direction[] KnightDirections =
+    [
+        new(1, 2),
+        new(2, 1),
+        new(2, -1),
+        new(1, -2),
+        new(-1, -2),
+        new(-2, -1),
+        new(-2, 1),
+        new(-1, 2)
+    ];
+
+
+    /// <summary>
+    /// Returns true when the square is attacked by at least one piece of the given color.
+    /// </summary>
+    /// <param name="position">The position to inspect.</param>
+    /// <param name="square">The square being tested for attacks.</param>
+    /// <param name="attackingColor">The color of the attacking side.</param>
+    public static bool IsSquareAttacked(Position position, Square square, Color attackingColor)
+    {
+        ArgumentNullException.ThrowIfNull(position);
+
+        return IsAttackedByKnight(position, square, attackingColor);
+    }
+
+    // Checks the possible source squares from which a knight could attack the target square.
+    private static bool IsAttackedByKnight(Position position, Square target, Color attackingColor)
+    {
+        foreach (Direction direction in KnightDirections)
+        {
+            int attackerFile = target.File + direction.FileOffset;
+            int attackerRank = target.Rank + direction.RankOffset;
+
+            if (!IsInsideBoard(attackerFile, attackerRank))
+            {
+                continue;
+            }
+
+            Square attackerSquare = Square.FromFileRank(attackerFile, attackerRank);
+            Piece? attacker = position.Board.GetPiece(attackerSquare);
+
+            if (attacker is { Type: PieceType.Knight, Color: var color } && color == attackingColor)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static bool IsInsideBoard(int file, int rank)
+    {
+        return file is >= 0 and <= 7 && rank is >= 0 and <= 7;
+    }
+}

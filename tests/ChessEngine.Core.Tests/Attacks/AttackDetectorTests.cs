@@ -1,0 +1,81 @@
+using ChessEngine.Core.Attacks;
+using ChessEngine.Core.Board;
+using ChessEngine.Core.Enums;
+using ChessEngine.Core.Positions;
+using ChessEngine.Core.ValueObjects;
+
+namespace ChessEngine.Core.Tests.Attacks;
+
+public sealed class AttackDetectorTests
+{
+    [Fact]
+    public void IsSquareAttacked_WhenKnightAttacksSquare_ReturnsTrue()
+    {
+        ChessBoard board = ChessBoard.CreateEmpty();
+        board.SetPiece(Square.FromName("f5"), new Piece(Color.Black, PieceType.Knight));
+        Position position = CreatePosition(board);
+
+        bool isAttacked = AttackDetector.IsSquareAttacked(
+            position,
+            Square.FromName("e3"),
+            Color.Black);
+
+        Assert.True(isAttacked);
+    }
+
+    [Fact]
+    public void IsSquareAttacked_WhenKnightBelongsToDifferentColor_ReturnsFalse()
+    {
+        ChessBoard board = ChessBoard.CreateEmpty();
+        board.SetPiece(Square.FromName("f5"), new Piece(Color.White, PieceType.Knight));
+        Position position = CreatePosition(board);
+
+        bool isAttacked = AttackDetector.IsSquareAttacked(
+            position,
+            Square.FromName("e3"),
+            Color.Black);
+
+        Assert.False(isAttacked);
+    }
+
+    [Fact]
+    public void IsSquareAttacked_WhenKnightDoesNotAttackSquare_ReturnsFalse()
+    {
+        ChessBoard board = ChessBoard.CreateEmpty();
+        board.SetPiece(Square.FromName("e5"), new Piece(Color.Black, PieceType.Knight));
+        Position position = CreatePosition(board);
+
+        bool isAttacked = AttackDetector.IsSquareAttacked(
+            position,
+            Square.FromName("e3"),
+            Color.Black);
+
+        Assert.False(isAttacked);
+    }
+
+    [Fact]
+    public void IsSquareAttacked_WhenTargetIsNearBoardEdge_SkipsOffBoardKnightSources()
+    {
+        ChessBoard board = ChessBoard.CreateEmpty();
+        board.SetPiece(Square.FromName("b3"), new Piece(Color.Black, PieceType.Knight));
+        Position position = CreatePosition(board);
+
+        bool isAttacked = AttackDetector.IsSquareAttacked(
+            position,
+            Square.FromName("a1"),
+            Color.Black);
+
+        Assert.True(isAttacked);
+    }
+
+    private static Position CreatePosition(ChessBoard board)
+    {
+        return new Position(
+            board,
+            Color.White,
+            CastlingRights.None,
+            enPassantTarget: null,
+            halfmoveClock: 0,
+            fullmoveNumber: 1);
+    }
+}

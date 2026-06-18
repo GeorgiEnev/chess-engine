@@ -1,4 +1,5 @@
 using ChessEngine.Core.Enums;
+using ChessEngine.Core.Geometry;
 using ChessEngine.Core.Positions;
 using ChessEngine.Core.ValueObjects;
 
