@@ -10,19 +10,6 @@ namespace ChessEngine.Core.Attacks;
 /// </summary>
 public static class AttackDetector
 {
-    private static readonly Direction[] KnightDirections =
-    [
-        new(1, 2),
-        new(2, 1),
-        new(2, -1),
-        new(1, -2),
-        new(-1, -2),
-        new(-2, -1),
-        new(-2, 1),
-        new(-1, 2)
-    ];
-
-
     /// <summary>
     /// Returns true when the square is attacked by at least one piece of the given color.
     /// </summary>
@@ -39,12 +26,12 @@ public static class AttackDetector
     // Checks the possible source squares from which a knight could attack the target square.
     private static bool IsAttackedByKnight(Position position, Square target, Color attackingColor)
     {
-        foreach (Direction direction in KnightDirections)
+        foreach (Direction direction in DirectionSets.Knight)
         {
             int attackerFile = target.File + direction.FileOffset;
             int attackerRank = target.Rank + direction.RankOffset;
 
-            if (!IsInsideBoard(attackerFile, attackerRank))
+            if (!BoardGeometry.IsInsideBoard(attackerFile, attackerRank))
             {
                 continue;
             }
@@ -59,10 +46,5 @@ public static class AttackDetector
         }
 
         return false;
-    }
-
-    private static bool IsInsideBoard(int file, int rank)
-    {
-        return file is >= 0 and <= 7 && rank is >= 0 and <= 7;
     }
 }
