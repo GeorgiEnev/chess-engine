@@ -100,6 +100,7 @@ public static class MoveGenerator
     {
         GeneratePawnForwardMoves(position, from, movingColor, moves);
         GeneratePawnCaptureMoves(position, from, movingColor, moves);
+        GeneratePawnEnPassantMoves(position, from, movingColor, moves);
     }
 
     // Generates pseudo-legal forward pawn moves, including the two-square move from the starting rank.
@@ -160,6 +161,33 @@ public static class MoveGenerator
                 AddPawnMove(from, to, movingColor, moves);
             }
         }
+    }
+
+    // Generates pseudo-legal en passant captures when the target square is diagonally forward.
+    private static void GeneratePawnEnPassantMoves(Position position, Square from, Color movingColor, List<Move> moves)
+    {
+        if (position.EnPassantTarget is null)
+        {
+            return;
+        }
+
+        Square enPassantTarget = position.EnPassantTarget.Value;
+        int forwardDirection = movingColor == Color.White ? 1 : -1;
+        int expectedRank = from.Rank + forwardDirection;
+
+        if (enPassantTarget.Rank != expectedRank)
+        {
+            return;
+        }
+
+        int fileDistance = Math.Abs(enPassantTarget.File - from.File);
+
+        if (fileDistance != 1)
+        {
+            return;
+        }
+
+        moves.Add(new Move(from, enPassantTarget));
     }
 
     // Adds a normal pawn move, or all promotion choices when the pawn reaches the final rank.

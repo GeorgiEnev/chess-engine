@@ -400,13 +400,73 @@ public sealed class MoveGeneratorTests
         Assert.DoesNotContain(new Move(Square.FromName("e7"), Square.FromName("e8"), PieceType.Pawn), moves);
     }
 
+    [Fact]
+    public void GenerateMoves_ForWhitePawnWithEnPassantTarget_GeneratesEnPassantMove()
+    {
+        ChessBoard board = ChessBoard.CreateEmpty();
+        board.SetPiece(Square.FromName("e5"), new Piece(Color.White, PieceType.Pawn));
+        board.SetPiece(Square.FromName("d5"), new Piece(Color.Black, PieceType.Pawn));
+        Position position = CreatePosition(board, Color.White, Square.FromName("d6"));
+
+        IReadOnlyList<Move> moves = MoveGenerator.GenerateMoves(position);
+
+        Assert.Equal(2, moves.Count);
+        Assert.Contains(new Move(Square.FromName("e5"), Square.FromName("e6")), moves);
+        Assert.Contains(new Move(Square.FromName("e5"), Square.FromName("d6")), moves);
+    }
+
+    [Fact]
+    public void GenerateMoves_ForBlackPawnWithEnPassantTarget_GeneratesEnPassantMove()
+    {
+        ChessBoard board = ChessBoard.CreateEmpty();
+        board.SetPiece(Square.FromName("e4"), new Piece(Color.Black, PieceType.Pawn));
+        board.SetPiece(Square.FromName("d4"), new Piece(Color.White, PieceType.Pawn));
+        Position position = CreatePosition(board, Color.Black, Square.FromName("d3"));
+
+        IReadOnlyList<Move> moves = MoveGenerator.GenerateMoves(position);
+
+        Assert.Equal(2, moves.Count);
+        Assert.Contains(new Move(Square.FromName("e4"), Square.FromName("e3")), moves);
+        Assert.Contains(new Move(Square.FromName("e4"), Square.FromName("d3")), moves);
+    }
+
+    [Fact]
+    public void GenerateMoves_ForPawnWithoutEnPassantTarget_DoesNotGenerateEnPassantMove()
+    {
+        ChessBoard board = ChessBoard.CreateEmpty();
+        board.SetPiece(Square.FromName("e5"), new Piece(Color.White, PieceType.Pawn));
+        board.SetPiece(Square.FromName("d5"), new Piece(Color.Black, PieceType.Pawn));
+        Position position = CreatePosition(board, Color.White);
+
+        IReadOnlyList<Move> moves = MoveGenerator.GenerateMoves(position);
+
+        Assert.DoesNotContain(new Move(Square.FromName("e5"), Square.FromName("d6")), moves);
+    }
+
+    [Fact]
+    public void GenerateMoves_ForPawnWithInvalidEnPassantTarget_DoesNotGenerateEnPassantMove()
+    {
+        ChessBoard board = ChessBoard.CreateEmpty();
+        board.SetPiece(Square.FromName("e5"), new Piece(Color.White, PieceType.Pawn));
+        Position position = CreatePosition(board, Color.White, Square.FromName("g6"));
+
+        IReadOnlyList<Move> moves = MoveGenerator.GenerateMoves(position);
+
+        Assert.DoesNotContain(new Move(Square.FromName("e5"), Square.FromName("g6")), moves);
+    }
+
     private static Position CreatePosition(ChessBoard board, Color sideToMove)
+    {
+        return CreatePosition(board, sideToMove, enPassantTarget: null);
+    }
+
+    private static Position CreatePosition(ChessBoard board, Color sideToMove, Square? enPassantTarget)
     {
         return new Position(
             board,
             sideToMove,
             CastlingRights.None,
-            enPassantTarget: null,
+            enPassantTarget,
             halfmoveClock: 0,
             fullmoveNumber: 1);
     }
