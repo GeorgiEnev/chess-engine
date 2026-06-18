@@ -334,6 +334,72 @@ public sealed class MoveGeneratorTests
         Assert.Contains(new Move(Square.FromName("a4"), Square.FromName("b5")), moves);
     }
 
+    [Fact]
+    public void GenerateMoves_ForWhitePawnMovingToLastRank_GeneratesPromotionMoves()
+    {
+        ChessBoard board = ChessBoard.CreateEmpty();
+        board.SetPiece(Square.FromName("e7"), new Piece(Color.White, PieceType.Pawn));
+        Position position = CreatePosition(board, Color.White);
+
+        IReadOnlyList<Move> moves = MoveGenerator.GenerateMoves(position);
+
+        Assert.Equal(4, moves.Count);
+        Assert.Contains(new Move(Square.FromName("e7"), Square.FromName("e8"), PieceType.Queen), moves);
+        Assert.Contains(new Move(Square.FromName("e7"), Square.FromName("e8"), PieceType.Rook), moves);
+        Assert.Contains(new Move(Square.FromName("e7"), Square.FromName("e8"), PieceType.Bishop), moves);
+        Assert.Contains(new Move(Square.FromName("e7"), Square.FromName("e8"), PieceType.Knight), moves);
+        Assert.DoesNotContain(new Move(Square.FromName("e7"), Square.FromName("e8")), moves);
+    }
+
+    [Fact]
+    public void GenerateMoves_ForBlackPawnMovingToLastRank_GeneratesPromotionMoves()
+    {
+        ChessBoard board = ChessBoard.CreateEmpty();
+        board.SetPiece(Square.FromName("e2"), new Piece(Color.Black, PieceType.Pawn));
+        Position position = CreatePosition(board, Color.Black);
+
+        IReadOnlyList<Move> moves = MoveGenerator.GenerateMoves(position);
+
+        Assert.Equal(4, moves.Count);
+        Assert.Contains(new Move(Square.FromName("e2"), Square.FromName("e1"), PieceType.Queen), moves);
+        Assert.Contains(new Move(Square.FromName("e2"), Square.FromName("e1"), PieceType.Rook), moves);
+        Assert.Contains(new Move(Square.FromName("e2"), Square.FromName("e1"), PieceType.Bishop), moves);
+        Assert.Contains(new Move(Square.FromName("e2"), Square.FromName("e1"), PieceType.Knight), moves);
+        Assert.DoesNotContain(new Move(Square.FromName("e2"), Square.FromName("e1")), moves);
+    }
+
+    [Fact]
+    public void GenerateMoves_ForWhitePawnCapturingOnLastRank_GeneratesPromotionCaptureMoves()
+    {
+        ChessBoard board = ChessBoard.CreateEmpty();
+        board.SetPiece(Square.FromName("e7"), new Piece(Color.White, PieceType.Pawn));
+        board.SetPiece(Square.FromName("d8"), new Piece(Color.Black, PieceType.Rook));
+        Position position = CreatePosition(board, Color.White);
+
+        IReadOnlyList<Move> moves = MoveGenerator.GenerateMoves(position);
+
+        Assert.Equal(8, moves.Count);
+        Assert.Contains(new Move(Square.FromName("e7"), Square.FromName("e8"), PieceType.Queen), moves);
+        Assert.Contains(new Move(Square.FromName("e7"), Square.FromName("d8"), PieceType.Queen), moves);
+        Assert.Contains(new Move(Square.FromName("e7"), Square.FromName("d8"), PieceType.Rook), moves);
+        Assert.Contains(new Move(Square.FromName("e7"), Square.FromName("d8"), PieceType.Bishop), moves);
+        Assert.Contains(new Move(Square.FromName("e7"), Square.FromName("d8"), PieceType.Knight), moves);
+        Assert.DoesNotContain(new Move(Square.FromName("e7"), Square.FromName("d8")), moves);
+    }
+
+    [Fact]
+    public void GenerateMoves_ForPromotion_DoesNotGenerateKingOrPawnPromotions()
+    {
+        ChessBoard board = ChessBoard.CreateEmpty();
+        board.SetPiece(Square.FromName("e7"), new Piece(Color.White, PieceType.Pawn));
+        Position position = CreatePosition(board, Color.White);
+
+        IReadOnlyList<Move> moves = MoveGenerator.GenerateMoves(position);
+
+        Assert.DoesNotContain(new Move(Square.FromName("e7"), Square.FromName("e8"), PieceType.King), moves);
+        Assert.DoesNotContain(new Move(Square.FromName("e7"), Square.FromName("e8"), PieceType.Pawn), moves);
+    }
+
     private static Position CreatePosition(ChessBoard board, Color sideToMove)
     {
         return new Position(

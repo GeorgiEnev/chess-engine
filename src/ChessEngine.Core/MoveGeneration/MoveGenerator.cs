@@ -37,6 +37,14 @@ public static class MoveGenerator
         new(-1, 0)
     ];
 
+    private static readonly PieceType[] PromotionPieceTypes =
+    [
+        PieceType.Queen,
+        PieceType.Rook,
+        PieceType.Bishop,
+        PieceType.Knight
+    ];
+
     /// <summary>
     /// Generates pseudo-legal moves for the side whose turn it is to move.
     /// </summary>
@@ -114,7 +122,7 @@ public static class MoveGenerator
             return;
         }
 
-        moves.Add(new Move(from, oneStep));
+        AddPawnMove(from, oneStep, movingColor, moves);
 
         if (from.Rank != startingRank)
         {
@@ -149,8 +157,25 @@ public static class MoveGenerator
 
             if (IsOccupiedByEnemyPiece(position, to, movingColor))
             {
-                moves.Add(new Move(from, to));
+                AddPawnMove(from, to, movingColor, moves);
             }
+        }
+    }
+
+    // Adds a normal pawn move, or all promotion choices when the pawn reaches the final rank.
+    private static void AddPawnMove(Square from, Square to, Color movingColor, List<Move> moves)
+    {
+        int promotionRank = Color.White == movingColor ? 7 : 0;
+
+        if (to.Rank != promotionRank)
+        {
+            moves.Add(new Move(from, to));
+            return;
+        }
+
+        foreach (PieceType promotionPieceType in PromotionPieceTypes)
+        {
+            moves.Add(new Move(from, to, promotionPieceType));
         }
     }
 
