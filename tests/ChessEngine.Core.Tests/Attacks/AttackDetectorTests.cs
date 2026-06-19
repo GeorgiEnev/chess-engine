@@ -9,6 +9,81 @@ namespace ChessEngine.Core.Tests.Attacks;
 public sealed class AttackDetectorTests
 {
     [Fact]
+    public void IsSquareAttacked_WhenWhitePawnAttacksSquare_ReturnsTrue()
+    {
+        ChessBoard board = ChessBoard.CreateEmpty();
+        board.SetPiece(Square.FromName("d4"), new Piece(Color.White, PieceType.Pawn));
+        Position position = CreatePosition(board);
+
+        bool isAttacked = AttackDetector.IsSquareAttacked(
+            position,
+            Square.FromName("e5"),
+            Color.White);
+
+        Assert.True(isAttacked);
+    }
+
+    [Fact]
+    public void IsSquareAttacked_WhenBlackPawnAttacksSquare_ReturnsTrue()
+    {
+        ChessBoard board = ChessBoard.CreateEmpty();
+        board.SetPiece(Square.FromName("d5"), new Piece(Color.Black, PieceType.Pawn));
+        Position position = CreatePosition(board);
+
+        bool isAttacked = AttackDetector.IsSquareAttacked(
+            position,
+            Square.FromName("e4"),
+            Color.Black);
+
+        Assert.True(isAttacked);
+    }
+
+    [Fact]
+    public void IsSquareAttacked_WhenPawnBelongsToDifferentColor_ReturnsFalse()
+    {
+        ChessBoard board = ChessBoard.CreateEmpty();
+        board.SetPiece(Square.FromName("d4"), new Piece(Color.White, PieceType.Pawn));
+        Position position = CreatePosition(board);
+
+        bool isAttacked = AttackDetector.IsSquareAttacked(
+            position,
+            Square.FromName("e5"),
+            Color.Black);
+
+        Assert.False(isAttacked);
+    }
+
+    [Fact]
+    public void IsSquareAttacked_WhenPawnIsDirectlyInFrontOfSquare_ReturnsFalse()
+    {
+        ChessBoard board = ChessBoard.CreateEmpty();
+        board.SetPiece(Square.FromName("e4"), new Piece(Color.White, PieceType.Pawn));
+        Position position = CreatePosition(board);
+
+        bool isAttacked = AttackDetector.IsSquareAttacked(
+            position,
+            Square.FromName("e5"),
+            Color.White);
+
+        Assert.False(isAttacked);
+    }
+
+    [Fact]
+    public void IsSquareAttacked_WhenTargetIsNearBoardEdge_SkipsOffBoardPawnSources()
+    {
+        ChessBoard board = ChessBoard.CreateEmpty();
+        board.SetPiece(Square.FromName("b2"), new Piece(Color.White, PieceType.Pawn));
+        Position position = CreatePosition(board);
+
+        bool isAttacked = AttackDetector.IsSquareAttacked(
+            position,
+            Square.FromName("a3"),
+            Color.White);
+
+        Assert.True(isAttacked);
+    }
+
+    [Fact]
     public void IsSquareAttacked_WhenKnightAttacksSquare_ReturnsTrue()
     {
         ChessBoard board = ChessBoard.CreateEmpty();

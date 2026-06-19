@@ -20,10 +20,39 @@ public static class AttackDetector
     {
         ArgumentNullException.ThrowIfNull(position);
 
-        return IsAttackedByKnight(position, square, attackingColor);
+        return IsAttackedByPawn(position, square, attackingColor)
+            || IsAttackedByKnight(position, square, attackingColor);
     }
 
-    // Checks the possible source squares from which a knight could attack the target square.
+    // Checks the possible squares from which a pawn could attack the target square.
+    private static bool IsAttackedByPawn(Position position, Square target, Color attackingColor)
+    {
+        int attackerRank = attackingColor == Color.White
+            ? target.Rank - 1
+            : target.Rank + 1;
+
+        for (int fileOffset = -1; fileOffset <= 1; fileOffset += 2)
+        {
+            int attackerFile = target.File + fileOffset;
+
+            if (!BoardGeometry.IsInsideBoard(attackerFile, attackerRank))
+            {
+                continue;
+            }
+
+            Square attackerSquare = Square.FromFileRank(attackerFile, attackerRank);
+            Piece? attacker = position.Board.GetPiece(attackerSquare);
+
+            if (attacker is { Type: PieceType.Pawn, Color: var color } && color == attackingColor)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    // Checks the possible squares from which a knight could attack the target square.
     private static bool IsAttackedByKnight(Position position, Square target, Color attackingColor)
     {
         foreach (Direction direction in DirectionSets.Knight)
