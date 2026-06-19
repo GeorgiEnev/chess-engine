@@ -1,4 +1,5 @@
 using ChessEngine.Core.Enums;
+using ChessEngine.Core.Geometry;
 using ChessEngine.Core.Positions;
 using ChessEngine.Core.ValueObjects;
 
@@ -9,52 +10,12 @@ namespace ChessEngine.Core.MoveGeneration;
 /// </summary>
 public static class MoveGenerator
 {
-    private static readonly Direction[] KnightDirections =
-    [
-        new(1, 2),
-        new(2, 1),
-        new(2, -1),
-        new(1, -2),
-        new(-1, -2),
-        new(-2, -1),
-        new(-2, 1),
-        new(-1, 2)
-    ];
-
-    private static readonly Direction[] BishopDirections =
-    [
-        new(1, 1),
-        new(1, -1),
-        new(-1, -1),
-        new(-1, 1)
-    ];
-
-    private static readonly Direction[] RookDirections =
-    [
-        new(0, 1),
-        new(1, 0),
-        new(0, -1),
-        new(-1, 0)
-    ];
-
     private static readonly PieceType[] PromotionPieceTypes =
     [
         PieceType.Queen,
         PieceType.Rook,
         PieceType.Bishop,
         PieceType.Knight
-    ];
-
-    private static readonly Direction[] KingDirections =
-    [
-        new(0, 1),
-        new(1, 1),
-        new(1, 0),
-        new(1, -1),
-        new(0, -1),
-        new(-1, -1),
-        new(-1, 0),
-        new(-1, 1)
     ];
 
     /// <summary>
@@ -89,17 +50,17 @@ public static class MoveGenerator
                     break;
 
                 case PieceType.Bishop:
-                    GenerateSlidingMoves(position, from, piece.Value.Color, BishopDirections, moves);
+                    GenerateSlidingMoves(position, from, piece.Value.Color, DirectionSets.Bishop, moves);
                     break;
 
                 case PieceType.Rook:
-                    GenerateSlidingMoves(position, from, piece.Value.Color, RookDirections, moves);
+                    GenerateSlidingMoves(position, from, piece.Value.Color, DirectionSets.Rook, moves);
                     break;
 
                 // A queen combines bishop-style diagonal movement and rook-style straight movement.
                 case PieceType.Queen:
-                    GenerateSlidingMoves(position, from, piece.Value.Color, BishopDirections, moves);
-                    GenerateSlidingMoves(position, from, piece.Value.Color, RookDirections, moves);
+                    GenerateSlidingMoves(position, from, piece.Value.Color, DirectionSets.Bishop, moves);
+                    GenerateSlidingMoves(position, from, piece.Value.Color, DirectionSets.Rook, moves);
                     break;
 
                 case PieceType.King:
@@ -127,7 +88,7 @@ public static class MoveGenerator
 
         int oneStepRank = from.Rank + forwardDirection;
 
-        if (!IsInsideBoard(from.File, oneStepRank))
+        if (!BoardGeometry.IsInsideBoard(from.File, oneStepRank))
         {
             return;
         }
@@ -165,7 +126,7 @@ public static class MoveGenerator
         {
             int targetFile = from.File + fileOffset;
 
-            if (!IsInsideBoard(targetFile, targetRank))
+            if (!BoardGeometry.IsInsideBoard(targetFile, targetRank))
             {
                 continue;
             }
@@ -226,12 +187,12 @@ public static class MoveGenerator
     // Generates pseudo-legal knight moves by checking each fixed L-shaped target square.
     private static void GenerateKnightMoves(Position position, Square from, Color movingColor, List<Move> moves)
     {
-        foreach (Direction direction in KnightDirections)
+        foreach (Direction direction in DirectionSets.Knight)
         {
             int targetFile = from.File + direction.FileOffset;
             int targetRank = from.Rank + direction.RankOffset;
 
-            if (!IsInsideBoard(targetFile, targetRank))
+            if (!BoardGeometry.IsInsideBoard(targetFile, targetRank))
             {
                 continue;
             }
@@ -261,7 +222,7 @@ public static class MoveGenerator
             int targetFile = from.File + direction.FileOffset;
             int targetRank = from.Rank + direction.RankOffset;
 
-            while (IsInsideBoard(targetFile, targetRank))
+            while (BoardGeometry.IsInsideBoard(targetFile, targetRank))
             {
                 Square to = Square.FromFileRank(targetFile, targetRank);
 
@@ -286,12 +247,12 @@ public static class MoveGenerator
     // Generates pseudo-legal king moves by checking each adjacent target square.
     private static void GenerateKingMoves(Position position, Square from, Color movingColor, List<Move> moves)
     {
-        foreach (Direction direction in KingDirections)
+        foreach (Direction direction in DirectionSets.King)
         {
             int targetFile = from.File + direction.FileOffset;
             int targetRank = from.Rank + direction.RankOffset;
 
-            if (!IsInsideBoard(targetFile, targetRank))
+            if (!BoardGeometry.IsInsideBoard(targetFile, targetRank))
             {
                 continue;
             }
@@ -305,11 +266,6 @@ public static class MoveGenerator
 
             moves.Add(new Move(from, to));
         }
-    }
-
-    private static bool IsInsideBoard(int file, int rank)
-    {
-        return file is >= 0 and <= 7 && rank is >= 0 and <= 7;
     }
 
     private static bool IsOccupiedByFriendlyPiece(Position position, Square square, Color movingColor)
