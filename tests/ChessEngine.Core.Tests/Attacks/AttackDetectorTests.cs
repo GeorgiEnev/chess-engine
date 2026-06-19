@@ -203,6 +203,112 @@ public sealed class AttackDetectorTests
         Assert.True(isAttacked);
     }
 
+    [Fact]
+    public void IsSquareAttacked_WhenBishopAttacksDiagonally_ReturnsTrue()
+    {
+        ChessBoard board = ChessBoard.CreateEmpty();
+        board.SetPiece(Square.FromName("h7"), new Piece(Color.Black, PieceType.Bishop));
+        Position position = CreatePosition(board);
+
+        bool isAttacked = AttackDetector.IsSquareAttacked(
+            position,
+            Square.FromName("e4"),
+            Color.Black);
+
+        Assert.True(isAttacked);
+    }
+
+    [Fact]
+    public void IsSquareAttacked_WhenRookAttacksStraight_ReturnsTrue()
+    {
+        ChessBoard board = ChessBoard.CreateEmpty();
+        board.SetPiece(Square.FromName("e8"), new Piece(Color.Black, PieceType.Rook));
+        Position position = CreatePosition(board);
+
+        bool isAttacked = AttackDetector.IsSquareAttacked(
+            position,
+            Square.FromName("e4"),
+            Color.Black);
+
+        Assert.True(isAttacked);
+    }
+
+    [Fact]
+    public void IsSquareAttacked_WhenQueenAttacksDiagonally_ReturnsTrue()
+    {
+        ChessBoard board = ChessBoard.CreateEmpty();
+        board.SetPiece(Square.FromName("h7"), new Piece(Color.Black, PieceType.Queen));
+        Position position = CreatePosition(board);
+
+        bool isAttacked = AttackDetector.IsSquareAttacked(
+            position,
+            Square.FromName("e4"),
+            Color.Black);
+
+        Assert.True(isAttacked);
+    }
+
+    [Fact]
+    public void IsSquareAttacked_WhenQueenAttacksStraight_ReturnsTrue()
+    {
+        ChessBoard board = ChessBoard.CreateEmpty();
+        board.SetPiece(Square.FromName("e8"), new Piece(Color.Black, PieceType.Queen));
+        Position position = CreatePosition(board);
+
+        bool isAttacked = AttackDetector.IsSquareAttacked(
+            position,
+            Square.FromName("e4"),
+            Color.Black);
+
+        Assert.True(isAttacked);
+    }
+
+    [Fact]
+    public void IsSquareAttacked_WhenSlidingPieceIsBlocked_ReturnsFalse()
+    {
+        ChessBoard board = ChessBoard.CreateEmpty();
+        board.SetPiece(Square.FromName("e8"), new Piece(Color.Black, PieceType.Rook));
+        board.SetPiece(Square.FromName("e6"), new Piece(Color.White, PieceType.Pawn));
+        Position position = CreatePosition(board);
+
+        bool isAttacked = AttackDetector.IsSquareAttacked(
+            position,
+            Square.FromName("e4"),
+            Color.Black);
+
+        Assert.False(isAttacked);
+    }
+
+    [Fact]
+    public void IsSquareAttacked_WhenWrongSlidingPieceIsOnLine_ReturnsFalse()
+    {
+        ChessBoard board = ChessBoard.CreateEmpty();
+        board.SetPiece(Square.FromName("e8"), new Piece(Color.Black, PieceType.Bishop));
+        Position position = CreatePosition(board);
+
+        bool isAttacked = AttackDetector.IsSquareAttacked(
+            position,
+            Square.FromName("e4"),
+            Color.Black);
+
+        Assert.False(isAttacked);
+    }
+
+    [Fact]
+    public void IsSquareAttacked_WhenSlidingPieceBelongsToDifferentColor_ReturnsFalse()
+    {
+        ChessBoard board = ChessBoard.CreateEmpty();
+        board.SetPiece(Square.FromName("e8"), new Piece(Color.White, PieceType.Rook));
+        Position position = CreatePosition(board);
+
+        bool isAttacked = AttackDetector.IsSquareAttacked(
+            position,
+            Square.FromName("e4"),
+            Color.Black);
+
+        Assert.False(isAttacked);
+    }
+
     private static Position CreatePosition(ChessBoard board)
     {
         return new Position(
