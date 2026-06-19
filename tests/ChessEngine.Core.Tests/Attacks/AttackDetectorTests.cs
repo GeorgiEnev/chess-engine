@@ -143,6 +143,66 @@ public sealed class AttackDetectorTests
         Assert.True(isAttacked);
     }
 
+    [Fact]
+    public void IsSquareAttacked_WhenKingAttacksAdjacentSquare_ReturnsTrue()
+    {
+        ChessBoard board = ChessBoard.CreateEmpty();
+        board.SetPiece(Square.FromName("e5"), new Piece(Color.Black, PieceType.King));
+        Position position = CreatePosition(board);
+
+        bool isAttacked = AttackDetector.IsSquareAttacked(
+            position,
+            Square.FromName("e4"),
+            Color.Black);
+
+        Assert.True(isAttacked);
+    }
+
+    [Fact]
+    public void IsSquareAttacked_WhenKingBelongsToDifferentColor_ReturnsFalse()
+    {
+        ChessBoard board = ChessBoard.CreateEmpty();
+        board.SetPiece(Square.FromName("e5"), new Piece(Color.White, PieceType.King));
+        Position position = CreatePosition(board);
+
+        bool isAttacked = AttackDetector.IsSquareAttacked(
+            position,
+            Square.FromName("e4"),
+            Color.Black);
+
+        Assert.False(isAttacked);
+    }
+
+    [Fact]
+    public void IsSquareAttacked_WhenKingIsTwoSquaresAway_ReturnsFalse()
+    {
+        ChessBoard board = ChessBoard.CreateEmpty();
+        board.SetPiece(Square.FromName("e6"), new Piece(Color.Black, PieceType.King));
+        Position position = CreatePosition(board);
+
+        bool isAttacked = AttackDetector.IsSquareAttacked(
+            position,
+            Square.FromName("e4"),
+            Color.Black);
+
+        Assert.False(isAttacked);
+    }
+
+    [Fact]
+    public void IsSquareAttacked_WhenTargetIsNearBoardEdge_SkipsOffBoardKingSources()
+    {
+        ChessBoard board = ChessBoard.CreateEmpty();
+        board.SetPiece(Square.FromName("b2"), new Piece(Color.Black, PieceType.King));
+        Position position = CreatePosition(board);
+
+        bool isAttacked = AttackDetector.IsSquareAttacked(
+            position,
+            Square.FromName("a1"),
+            Color.Black);
+
+        Assert.True(isAttacked);
+    }
+
     private static Position CreatePosition(ChessBoard board)
     {
         return new Position(
