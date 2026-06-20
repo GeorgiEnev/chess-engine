@@ -1,5 +1,6 @@
 using ChessEngine.Core.Attacks;
 using ChessEngine.Core.Enums;
+using ChessEngine.Core.Extensions;
 using ChessEngine.Core.Positions;
 using ChessEngine.Core.ValueObjects;
 
@@ -20,7 +21,7 @@ public static class CheckDetector
         ArgumentNullException.ThrowIfNull(position);
 
         Square kingSquare = FindKingSquare(position, color);
-        Color opponentColor = GetOppositeColor(color);
+        Color opponentColor = color.Opposite();
 
         return AttackDetector.IsSquareAttacked(position, kingSquare, opponentColor);
     }
@@ -40,10 +41,5 @@ public static class CheckDetector
         }
 
         throw new InvalidOperationException("Position does not contain a king for the requested color.");
-    }
-
-    private static Color GetOppositeColor(Color color)
-    {
-        return color == Color.White ? Color.Black : Color.White;
     }
 }

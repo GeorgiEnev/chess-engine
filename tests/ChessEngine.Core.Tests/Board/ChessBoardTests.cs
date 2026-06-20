@@ -110,4 +110,31 @@ public sealed class ChessBoardTests
             }
         }
     }
+
+    [Fact]
+    public void Copy_CreatesSeparateBoardWithSamePiecePlacement()
+    {
+        ChessBoard board = ChessBoard.CreateEmpty();
+        board.SetPiece(Square.FromName("b1"), new Piece(Color.White, PieceType.Knight));
+        board.SetPiece(Square.FromName("e8"), new Piece(Color.Black, PieceType.King));
+
+        ChessBoard copy = board.Copy();
+
+        Assert.Equal(new Piece(Color.White, PieceType.Knight), copy.GetPiece(Square.FromName("b1")));
+        Assert.Equal(new Piece(Color.Black, PieceType.King), copy.GetPiece(Square.FromName("e8")));
+    }
+
+    [Fact]
+    public void Copy_WhenCopyIsChanged_DoesNotChangeOriginalBoard()
+    {
+        ChessBoard board = ChessBoard.CreateEmpty();
+        board.SetPiece(Square.FromName("b1"), new Piece(Color.White, PieceType.Knight));
+
+        ChessBoard copy = board.Copy();
+        copy.RemovePiece(Square.FromName("b1"));
+        copy.SetPiece(Square.FromName("c3"), new Piece(Color.White, PieceType.Knight));
+
+        Assert.Equal(new Piece(Color.White, PieceType.Knight), board.GetPiece(Square.FromName("b1")));
+        Assert.Null(board.GetPiece(Square.FromName("c3")));
+    }
 }

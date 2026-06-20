@@ -20,6 +20,27 @@ public class ChessBoard
     }
 
     /// <summary>
+    /// Creates a separate board with the same piece placement.
+    /// </summary>
+    public ChessBoard Copy()
+    {
+        ChessBoard copy = CreateEmpty();
+
+        for (int index = 0; index < 64; index++)
+        {
+            Square square = new(index);
+            Piece? piece = GetPiece(square);
+
+            if (piece is not null)
+            {
+                copy.SetPiece(square, piece.Value);
+            }
+        }
+
+        return copy;
+    }
+
+    /// <summary>
     /// Creates an empty board.
     /// </summary>
     public static ChessBoard CreateEmpty()
