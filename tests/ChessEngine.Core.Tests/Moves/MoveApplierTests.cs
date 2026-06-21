@@ -131,6 +131,63 @@ public sealed class MoveApplierTests
         Assert.Throws<InvalidOperationException>(() => MoveApplier.Apply(position, move));
     }
 
+    [Fact]
+    public void Apply_ForWhitePawnPromotion_PlacesPromotedPiece()
+    {
+        ChessBoard board = ChessBoard.CreateEmpty();
+        board.SetPiece(Square.FromName("e7"), new Piece(Color.White, PieceType.Pawn));
+        Position position = CreatePosition(board, Color.White);
+        Move move = new(Square.FromName("e7"), Square.FromName("e8"), PieceType.Queen);
+
+        Position nextPosition = MoveApplier.Apply(position, move);
+
+        Assert.Null(nextPosition.Board.GetPiece(Square.FromName("e7")));
+        Assert.Equal(new Piece(Color.White, PieceType.Queen), nextPosition.Board.GetPiece(Square.FromName("e8")));
+    }
+
+    [Fact]
+    public void Apply_ForBlackPawnPromotion_PlacesPromotedPiece()
+    {
+        ChessBoard board = ChessBoard.CreateEmpty();
+        board.SetPiece(Square.FromName("e2"), new Piece(Color.Black, PieceType.Pawn));
+        Position position = CreatePosition(board, Color.Black);
+        Move move = new(Square.FromName("e2"), Square.FromName("e1"), PieceType.Knight);
+
+        Position nextPosition = MoveApplier.Apply(position, move);
+
+        Assert.Null(nextPosition.Board.GetPiece(Square.FromName("e2")));
+        Assert.Equal(new Piece(Color.Black, PieceType.Knight), nextPosition.Board.GetPiece(Square.FromName("e1")));
+    }
+
+    [Fact]
+    public void Apply_ForPromotionCapture_ReplacesTargetWithPromotedPiece()
+    {
+        ChessBoard board = ChessBoard.CreateEmpty();
+        board.SetPiece(Square.FromName("e7"), new Piece(Color.White, PieceType.Pawn));
+        board.SetPiece(Square.FromName("d8"), new Piece(Color.Black, PieceType.Rook));
+        Position position = CreatePosition(board, Color.White);
+        Move move = new(Square.FromName("e7"), Square.FromName("d8"), PieceType.Queen);
+
+        Position nextPosition = MoveApplier.Apply(position, move);
+
+        Assert.Null(nextPosition.Board.GetPiece(Square.FromName("e7")));
+        Assert.Equal(new Piece(Color.White, PieceType.Queen), nextPosition.Board.GetPiece(Square.FromName("d8")));
+    }
+
+    [Fact]
+    public void Apply_ForPromotion_DoesNotMutateOriginalPosition()
+    {
+        ChessBoard board = ChessBoard.CreateEmpty();
+        board.SetPiece(Square.FromName("e7"), new Piece(Color.White, PieceType.Pawn));
+        Position position = CreatePosition(board, Color.White);
+        Move move = new(Square.FromName("e7"), Square.FromName("e8"), PieceType.Queen);
+
+        MoveApplier.Apply(position, move);
+
+        Assert.Equal(new Piece(Color.White, PieceType.Pawn), position.Board.GetPiece(Square.FromName("e7")));
+        Assert.Null(position.Board.GetPiece(Square.FromName("e8")));
+    }
+
     private static Position CreatePosition(
         ChessBoard board,
         Color sideToMove,

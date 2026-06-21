@@ -27,9 +27,12 @@ public static class MoveApplier
             ?? throw new InvalidOperationException("Move source square does not contain a piece.");
 
         ChessBoard board = position.Board.Copy();
+        Piece pieceToPlace = move.Promotion is null
+            ? movingPiece
+            : new Piece(movingPiece.Color, move.Promotion.Value);
 
         board.RemovePiece(move.From);
-        board.SetPiece(move.To, movingPiece);
+        board.SetPiece(move.To, pieceToPlace);
 
         Color nextSideToMove = position.SideToMove.Opposite();
         int nextFullmoveNumber = position.SideToMove == Color.Black
