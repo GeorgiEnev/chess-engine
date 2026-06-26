@@ -188,6 +188,68 @@ public sealed class MoveApplierTests
         Assert.Null(position.Board.GetPiece(Square.FromName("e8")));
     }
 
+    [Fact]
+    public void Apply_ForWhiteEnPassant_RemovesCapturedPawn()
+    {
+        ChessBoard board = ChessBoard.CreateEmpty();
+        board.SetPiece(Square.FromName("e5"), new Piece(Color.White, PieceType.Pawn));
+        board.SetPiece(Square.FromName("d5"), new Piece(Color.Black, PieceType.Pawn));
+        Position position = CreatePosition(board, Color.White, enPassantTarget: Square.FromName("d6"));
+        Move move = new(Square.FromName("e5"), Square.FromName("d6"));
+
+        Position nextPosition = MoveApplier.Apply(position, move);
+
+        Assert.Null(nextPosition.Board.GetPiece(Square.FromName("e5")));
+        Assert.Equal(new Piece(Color.White, PieceType.Pawn), nextPosition.Board.GetPiece(Square.FromName("d6")));
+        Assert.Null(nextPosition.Board.GetPiece(Square.FromName("d5")));
+    }
+
+    [Fact]
+    public void Apply_ForBlackEnPassant_RemovesCapturedPawn()
+    {
+        ChessBoard board = ChessBoard.CreateEmpty();
+        board.SetPiece(Square.FromName("e4"), new Piece(Color.Black, PieceType.Pawn));
+        board.SetPiece(Square.FromName("d4"), new Piece(Color.White, PieceType.Pawn));
+        Position position = CreatePosition(board, Color.Black, enPassantTarget: Square.FromName("d3"));
+        Move move = new(Square.FromName("e4"), Square.FromName("d3"));
+
+        Position nextPosition = MoveApplier.Apply(position, move);
+
+        Assert.Null(nextPosition.Board.GetPiece(Square.FromName("e4")));
+        Assert.Equal(new Piece(Color.Black, PieceType.Pawn), nextPosition.Board.GetPiece(Square.FromName("d3")));
+        Assert.Null(nextPosition.Board.GetPiece(Square.FromName("d4")));
+    }
+
+    [Fact]
+    public void Apply_ForEnPassant_DoesNotMutateOriginalPosition()
+    {
+        ChessBoard board = ChessBoard.CreateEmpty();
+        board.SetPiece(Square.FromName("e5"), new Piece(Color.White, PieceType.Pawn));
+        board.SetPiece(Square.FromName("d5"), new Piece(Color.Black, PieceType.Pawn));
+        Position position = CreatePosition(board, Color.White, enPassantTarget: Square.FromName("d6"));
+        Move move = new(Square.FromName("e5"), Square.FromName("d6"));
+
+        MoveApplier.Apply(position, move);
+
+        Assert.Equal(new Piece(Color.White, PieceType.Pawn), position.Board.GetPiece(Square.FromName("e5")));
+        Assert.Equal(new Piece(Color.Black, PieceType.Pawn), position.Board.GetPiece(Square.FromName("d5")));
+        Assert.Null(position.Board.GetPiece(Square.FromName("d6")));
+    }
+
+    [Fact]
+    public void Apply_ForDiagonalPawnMoveWithoutEnPassantTarget_DoesNotRemoveSidePawn()
+    {
+        ChessBoard board = ChessBoard.CreateEmpty();
+        board.SetPiece(Square.FromName("e5"), new Piece(Color.White, PieceType.Pawn));
+        board.SetPiece(Square.FromName("d5"), new Piece(Color.Black, PieceType.Pawn));
+        Position position = CreatePosition(board, Color.White);
+        Move move = new(Square.FromName("e5"), Square.FromName("d6"));
+
+        Position nextPosition = MoveApplier.Apply(position, move);
+
+        Assert.Equal(new Piece(Color.Black, PieceType.Pawn), nextPosition.Board.GetPiece(Square.FromName("d5")));
+    }
+
     private static Position CreatePosition(
         ChessBoard board,
         Color sideToMove,

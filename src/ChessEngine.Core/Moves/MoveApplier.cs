@@ -31,6 +31,12 @@ public static class MoveApplier
             ? movingPiece
             : new Piece(movingPiece.Color, move.Promotion.Value);
 
+        if (IsEnPassantMove(position, move, movingPiece))
+        {
+            Square capturedPawnSquare = GetEnPassantCapturedPawnSquare(move, movingPiece.Color);
+            board.RemovePiece(capturedPawnSquare);
+        }
+
         board.RemovePiece(move.From);
         board.SetPiece(move.To, pieceToPlace);
 
@@ -46,5 +52,23 @@ public static class MoveApplier
             enPassantTarget: null,
             position.HalfmoveClock,
             nextFullmoveNumber);
+    }
+
+    // Returns true when the move is an en passant capture in the current position.
+    private static bool IsEnPassantMove(Position position, Move move, Piece movingPiece)
+    {
+        return movingPiece.Type == PieceType.Pawn
+            && position.EnPassantTarget == move.To
+            && move.From.File != move.To.File
+            && position.Board.IsEmpty(move.To);
+    }
+
+    private static Square GetEnPassantCapturedPawnSquare(Move move, Color movingColor)
+    {
+        int capturedPawnRank = movingColor == Color.White
+            ? move.To.Rank - 1
+            : move.To.Rank + 1;
+
+        return Square.FromFileRank(move.To.File, capturedPawnRank);
     }
 }
